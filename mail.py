@@ -9,7 +9,7 @@ from google.auth.transport.requests import Request
 
 def get_service(credentials_path, token_path):
 	''' Constructs a Gmail service object to use the Gmail API.
-		Makes use of a credentials as well as token file.
+		Makes use of a credentials and token file (separate).
 
 		Args:
 			credentials_path: Path to a file with Google API credentials.
@@ -40,7 +40,6 @@ def get_service(credentials_path, token_path):
 	service = build('gmail', 'v1', credentials=creds)
 	return service
 
-
-
-
-
+service = get_service('credentials.json', 'token.pickle')
+def get_info():
+	return service.users().history().list(userId='me', historyTypes='messageAdded', startHistoryId=238741).execute()

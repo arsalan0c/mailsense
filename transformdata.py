@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# This script rmodifies the emobank csv file to add sentiment orientation labels based on each text's valence value and removes unneeded columns
+# This script modifies the emobank csv file to add sentiment orientation labels based on each text's valence value and removes unneeded columns
 
 import pandas as pd
 import argparse
