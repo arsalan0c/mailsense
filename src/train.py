@@ -1,7 +1,8 @@
+
+import argparse
+import pandas as pd
 from fastai import *
 from fastai.text import *
-import pandas as pd
-import argparse
 
 def load_data(path):
 	df = pd.read_csv(path)

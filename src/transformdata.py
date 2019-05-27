@@ -2,8 +2,8 @@
 
 # This script modifies the emobank csv file to add sentiment orientation labels based on each text's valence value and removes unneeded columns
 
-import pandas as pd
 import argparse
+import pandas as pd
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-dp', '--datasetpath', help='string: path to the csv data file', type=str, action='store', required=True)
