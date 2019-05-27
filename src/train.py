@@ -1,16 +1,13 @@
 from fastai import *
 from fastai.text import *
 import pandas as pd
-import numpy as np
-from sklearn.model_selection import train_test_split
 import argparse
 
 def load_data(path):
 	df = pd.read_csv(path)
-	# split into train + val AND test
-	train_val_df, test_df = train_test_split(df, test_size=0.1)
-	# split train + val into train and val. train: 72%, val: 18%, test: 10%
-	train_df, val_df = train_test_split(train_val_df, test_size=0.20)
+	train_df = df[df[DATASET_COMPONENT_LABEL] == 'train']
+	val_df = df[df[DATASET_COMPONENT_LABEL] == 'val']
+	test_df = df[df[DATASET_COMPONENT_LABEL] == 'test']
 
 	# Language model data
 	data_lm = TextLMDataBunch.from_df(train_df=train_df, valid_df=val_df, test_df=test_df, text_cols=1, label_cols=2, path="")
@@ -42,6 +39,7 @@ def main():
 	parser.add_argument('-tce', '--textclassifierepochs', help='int: number of epochs to train the text classifier', type=int, action='store', default=2)
 	args = parser.parse_args()
 
+	DATASET_COMPONENT_LABEL = 'set'
 	LANGUAGE_MODEL_NAME = 'languagemodel_encoder'
 	TEXT_MODEL_NAME = 'textclassifier_encoder'
 
