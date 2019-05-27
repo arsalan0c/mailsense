@@ -11,7 +11,6 @@ parser.add_argument('-dp', '--datasetpath', help='string: path to the csv data f
 parser.add_argument('-op', '--outputpath', help='string: output path of the split csv data file (including name & extension)', type=str, action='store', required=True)
 parser.add_argument('-train', '--trainsize', help='float: size of training set as a proportion of total.', type=float, action='store', default=0.75)
 parser.add_argument('-test', '--testsize', help='float: size of test set as a proportion of total.', type=float, action='store', default=0.1)
-
 args = parser.parse_args()
 
 DATASET_COMPONENT_LABEL = 'set'
