@@ -45,7 +45,7 @@ def main():
 
 	data_lm, data_clas, test_df = load_data(args.datasetpath)
 	learn = train(data_lm, data_clas, args.learningmodelepochs, args.textclassifierepochs)
-	learn.save_encoder(MODEL_NAME)
+	learn.save_encoder(TEXT_MODEL_NAME)
 	show_results(learn)
 
 if __name__ == '__main__':
