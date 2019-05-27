@@ -29,6 +29,12 @@ def train(data_lm, data_clas, lm_epochs=2, tc_epochs=2):
 	learn.fit_one_cycle(tc_epochs, 1e-2)
 	return learn
 
+def show_results(learn):
+	preds, y, losses = learn.get_preds(DatasetType.Train, with_loss=True)
+	print(preds)
+	interp = ClassificationInterpretation(learn, preds, y, losses)
+	print(interp.confusion_matrix(slice_size=10))
+
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-dp', '--datasetpath', help='str: path to csv dataset', type=str, action='store', required=True)
@@ -38,25 +44,8 @@ def main():
 
 	data_lm, data_clas, test_df = load_data(args.datasetpath)
 	learn = train(data_lm, data_clas, args.learningmodelepochs, args.textclassifierepochs)
-	learn.save_encoder('tc_enc')
-	preds, y, losses = learn.get_preds(DatasetType.Test, with_loss=True)
-	print(preds)
-	interp = ClassificationInterpretation(learn, preds, y, losses)
-	print(interp.confusion_matrix(slice_size=10))
-	print(learn.predict('hello there, my name is Arsalan. How are you doing today?'))
-	pred_df = test_df
-	pred_df['polarity'] = pred_df['text'].apply(lambda row: str(learn.predict(row)[0]))
-	pred_df['text'] = pred_df['text'].apply(lambda row: row)
-	pred_df.to_csv('results.csv')
+	learn.save_encoder('textclassifier_encoder')
+	show_results(learn)
 
 if __name__ == '__main__':
 	main()
-
-
-
-
-
-
-
-
-
