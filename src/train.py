@@ -15,7 +15,7 @@ def load_data(path):
 	data_lm = TextLMDataBunch.from_df(train_df=train_df, valid_df=val_df, test_df=test_df, text_cols=1, label_cols=2, path="")
 	# Classifier model data
 	data_clas = TextClasDataBunch.from_df(train_df=train_df, valid_df=val_df, test_df=test_df, vocab=data_lm.train_ds.vocab, bs=32, text_cols=1, label_cols=2, path="")
-	return data_lm, data_clas, test_df
+	return data_lm, data_clas
 
 def train(data_lm, data_clas, lm_epochs=2, tc_epochs=2):
 	# create language model with pretrained weights
@@ -30,11 +30,10 @@ def train(data_lm, data_clas, lm_epochs=2, tc_epochs=2):
 
 def show_results(learn):
 	preds, y, losses = learn.get_preds(DatasetType.Train, with_loss=True)
-	print(preds)
 	interp = ClassificationInterpretation(learn, preds, y, losses)
 	print(interp.confusion_matrix(slice_size=10))
 
-def main():
+if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-dp', '--datasetpath', help='str: path to csv dataset', type=str, action='store', required=True)
 	parser.add_argument('-lme', '--learningmodelepochs', help='int: number of epochs to train the language model learner', type=int, action='store', default=2)
@@ -45,10 +44,7 @@ def main():
 	LANGUAGE_MODEL_NAME = 'languagemodel_encoder'
 	TEXT_MODEL_NAME = 'textclassifier_encoder'
 
-	data_lm, data_clas, test_df = load_data(args.datasetpath)
+	data_lm, data_clas = load_data(args.datasetpath)
 	learn = train(data_lm, data_clas, args.learningmodelepochs, args.textclassifierepochs)
 	learn.save_encoder(TEXT_MODEL_NAME)
 	show_results(learn)
-
-if __name__ == '__main__':
-	main()
