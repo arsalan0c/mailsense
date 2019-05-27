@@ -23,9 +23,9 @@ def train(data_lm, data_clas, lm_epochs=2, tc_epochs=2):
 	learn = language_model_learner(data_lm, arch=AWD_LSTM, drop_mult=0.5)
 	# train language model using one cycle policy
 	learn.fit_one_cycle(lm_epochs, 1e-2)
-	learn.save_encoder('lm_enc')
+	learn.save_encoder(LANGUAGE_MODEL_NAME)
 	learn = text_classifier_learner(data_clas, arch=AWD_LSTM, drop_mult=0.5)
-	learn.load_encoder('lm_enc')
+	learn.load_encoder(LANGUAGE_MODEL_NAME)
 	learn.fit_one_cycle(tc_epochs, 1e-2)
 	return learn
 
@@ -42,7 +42,8 @@ def main():
 	parser.add_argument('-tce', '--textclassifierepochs', help='int: number of epochs to train the text classifier', type=int, action='store', default=2)
 	args = parser.parse_args()
 
-	MODEL_NAME = 'textclassifier_encoder'
+	LANGUAGE_MODEL_NAME = 'languagemodel_encoder'
+	TEXT_MODEL_NAME = 'textclassifier_encoder'
 
 	data_lm, data_clas, test_df = load_data(args.datasetpath)
 	learn = train(data_lm, data_clas, args.learningmodelepochs, args.textclassifierepochs)
