@@ -1,0 +1,8 @@
+md5: 3fb2f4054e339640906addad66e5e3c5
+outs:
+- cache: true
+  md5: ea2434c7d8a24f4668f10a80b647df9e
+  metric: false
+  path: data/emobank.csv
+  persist: false
+wdir: ..
