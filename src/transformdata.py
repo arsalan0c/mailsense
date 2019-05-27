@@ -19,10 +19,8 @@ df['polarity'] = df.apply(lambda row:
 	axis=1
 )
 
-# columns to remove from dataframe
 to_drop = ['id', 'V', 'A', 'D']
 df.drop(to_drop, inplace=True, axis=1)
 # shuffle
 df = df.sample(frac=1).reset_index(drop=True)
-# save
 df.to_csv(args.outputpath)
