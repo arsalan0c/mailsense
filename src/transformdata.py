@@ -6,7 +6,6 @@ import pandas as pd
 import argparse
 
 parser = argparse.ArgumentParser()
-
 parser.add_argument('-dp', '--datasetpath', help='string: path to the csv data file', type=str, action='store', required=True)
 parser.add_argument('-op', '--outputpath', help='string: output path of the transformed csv data file (including name & extension)', type=str, action='store', required=True)
 args = parser.parse_args()
@@ -27,4 +26,3 @@ df.drop(to_drop, inplace=True, axis=1)
 df = df.sample(frac=1).reset_index(drop=True)
 # save
 df.to_csv(args.outputpath)
-
