@@ -42,9 +42,11 @@ def main():
 	parser.add_argument('-tce', '--textclassifierepochs', help='int: number of epochs to train the text classifier', type=int, action='store', default=2)
 	args = parser.parse_args()
 
+	MODEL_NAME = 'textclassifier_encoder'
+
 	data_lm, data_clas, test_df = load_data(args.datasetpath)
 	learn = train(data_lm, data_clas, args.learningmodelepochs, args.textclassifierepochs)
-	learn.save_encoder('textclassifier_encoder')
+	learn.save_encoder(MODEL_NAME)
 	show_results(learn)
 
 if __name__ == '__main__':
