@@ -1,0 +1,15 @@
+md5: 5fa6bc517e30dda1af2cc7027ccecdc1
+cmd: python3 src/evaluate.py -dp data/split_emobank.csv -op results/acc.metric -md
+  models -mn textclassifier.pkl
+wdir: .
+deps:
+- md5: 2be2e9c67c1001777f9f426e8840a21f
+  path: src/evaluate.py
+- md5: ab6a369d437f7364ab9f5ebfa0e8d718
+  path: models/textclassifier.pkl
+outs:
+- md5: 350c90ec73f1a651d0ca53c33a62a842
+  path: results/acc.metric
+  cache: false
+  metric: true
+  persist: false
