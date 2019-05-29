@@ -2,12 +2,12 @@ cmd: python3 src/split.py -dp data/transformed_emobank.csv -op data/split_emoban
 deps:
 - md5: 0b5589825e036e97ebf6532b7199ed1b
   path: src/split.py
-- md5: b65dcd4362c9d574d34183606dbdfede
+- md5: b1b2632ba7ffc729efc939dc36b4e854
   path: data/transformed_emobank.csv
-md5: 552451cf0421d77adcf7c851a1fb816c
+md5: c1154134822d5282d1ae58f19f3b3714
 outs:
 - cache: true
-  md5: 966f0305ae17bbd2b6bd27a3f35bc467
+  md5: cf56a9a037ca16fa0959bbb433721c53
   metric: false
   path: data/split_emobank.csv
   persist: false
