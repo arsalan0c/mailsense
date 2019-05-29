@@ -9,18 +9,18 @@ from fastai.text import *
 parser = argparse.ArgumentParser(description='process arguments required for performing inference with trained model on input text')
 parser.add_argument('-dp', '--datasetpath', help='str: path to csv dataset', type=str, action='store', required=True)
 parser.add_argument('-op', '--outputpath', help='str: path to output file containing model accuracy', type=str, action='store', required=True)
+parser.add_argument('-md', '--modeldirectory', help='str: path to directory in which the saved model file resides', type=str, action='store', required=True)
+parser.add_argument('-mn', '--modelname', help='str: file name of saved model', type=str, action='store', required=True)
 args = parser.parse_args()
 
 DATASET_COMPONENT_LABEL = 'set'
 DATASET_TEXT_LABEL = 'text'
 DATASET_TARGET_LABEL = 'polarity'
-MODEL_DIR = 'models'
-MODEL_NAME = 'textclassifier.pkl'
 
 df = pd.read_csv(args.datasetpath)
 test_df = df[df[DATASET_COMPONENT_LABEL] == 'test']
 
-learn = load_learner(MODEL_DIR, MODEL_NAME)
+learn = load_learner(args.modeldirectory, args.modelname)
 correct = 0
 total = 0
 for i in range(0, len(test_df)):
