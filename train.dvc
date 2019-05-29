@@ -1,0 +1,19 @@
+md5: 44bdc90785468d182b88f8f32ca2e1f3
+cmd: python3 src/train.py -dp data/split_emobank.csv -tcol 2 -lcol 3 -e 20
+wdir: .
+deps:
+- md5: 8b93eb82d7eb4eb9c376b6c4def370b7
+  path: src/train.py
+- md5: cf56a9a037ca16fa0959bbb433721c53
+  path: data/split_emobank.csv
+outs:
+- md5: ab6a369d437f7364ab9f5ebfa0e8d718
+  path: models/textclassifier.pkl
+  cache: true
+  metric: false
+  persist: false
+- md5: 3f2ea0b200d75d0ad44aa88a11cd9077
+  path: models/languagemodel_encoder.pth
+  cache: true
+  metric: false
+  persist: false
