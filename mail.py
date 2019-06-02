@@ -21,7 +21,10 @@ def get_service(credentials_path, token_path):
 	scopes = ['https://mail.google.com/']
 
 	creds = None
-	if os.path.exists(credentials_path):
+	# The file token.pickle stores the user's access and refresh tokens, and is
+    # created automatically when the authorization flow completes for the first
+    # time.
+	if os.path.exists(token_path):
 		with open(token_path, 'rb') as token:
 			creds = pickle.load(token)
 
@@ -40,6 +43,5 @@ def get_service(credentials_path, token_path):
 	service = build('gmail', 'v1', credentials=creds)
 	return service
 
-service = get_service('credentials.json', 'token.pickle')
 def get_info():
 	return service.users().history().list(userId='me', historyTypes='messageAdded', startHistoryId=238741).execute()
