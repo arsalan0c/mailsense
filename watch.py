@@ -7,8 +7,8 @@
 import mail
 import argparse
 
-parser = argparse.ArgumentParser(description='process arguments required for enabling gmail push notifications')
-parser.add_argument('-p', '--project', help='string: project name', type=str, action='store', required=True)
+parser = argparse.ArgumentParser(description='process arguments required for enabling Gmail push notifications')
+parser.add_argument('-p', '--project', help='string: project name from Google cloud', type=str, action='store', required=True)
 parser.add_argument('-t', '--topic', help='string: topic name', type=str, action='store', required=True)
 parser.add_argument('-cp', '--credentialspath', help='string: path to Gmail API credentials file', type=str, action='store', required=True)
 parser.add_argument('-tp', '--tokenpath', help='string: path to Gmail API token file', type=str, action='store', required=True)
@@ -21,4 +21,5 @@ request = {
 
 # get the Gmail api client
 service = mail.get_service(args.credentialspath, args.tokenpath)
+
 service.users().watch(userId='me', body=request).execute()
