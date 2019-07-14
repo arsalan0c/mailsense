@@ -108,7 +108,8 @@ def get_label_id(service, label_name):
 	'''Returns the unique identifier for a Gmail label based on its name.
 
 	Retrieves all the labels in the authenticated user's Gmail.
-	Returns the first matching name or None if no match is found.
+	Returns the id of the first label whose name matches.
+	Creates the label if there is no match and returns its id.
 
 	Args:
 		service: A Gmail service object to access the Gmail API.
@@ -120,13 +121,13 @@ def get_label_id(service, label_name):
 		if label['name'] == label_name:
 			return label['id']
 
-	return None
+	created_label = service.users().labels().create(userId='me', body={'name': label_name, 'labelListVisibility': 'labelShow', 'messageListVisibility': 'show'}).execute()
+	return created_label['id']
 
 def assign_label(service, mail_id, polarity):
 	'''Assigns a label to a Gmail mail.
 
 	Determines the label to be assigned, as a combination of the polarity text and its corresponding emoji.
-	Creates the label if it does not exist.
 	Assigns the label to the relevant mail using the mail's id and the label's id.
 
 	Args:
@@ -135,12 +136,7 @@ def assign_label(service, mail_id, polarity):
 		polarity: Polarity text of the mail, a result of the classification of its text(s).
 	'''
 	label_name = polarity + POLARITY_EMOJIS[polarity]
-	label_id = get_label_id(service, label_name)
-	if label_id is None:
-		# label does not exist in Gmail
-		created_label = service.users().labels().create(userId='me', body={'name': label_name, 'labelListVisibility': 'labelShow', 'messageListVisibility': 'show'}).execute()
-		label_id = created_label['id']
-
+	label_id = get_label_id(service, label_name)	
 	# assign label to mail
 	labels_to_change = {'removeLabelIds': [], 'addLabelIds': [label_id]}
 	service.users().messages().modify(userId='me', id=mail_id, body=labels_to_change).execute()
