@@ -9,6 +9,7 @@ import os.path
 import pickle
 import ast
 import operator
+import time
 
 from src.inference import initialize_model, predict
 
@@ -23,7 +24,7 @@ def get_service(credentials_path, token_path):
 		Returns:
 			service: Gmail service object.
 	'''
-	scopes = ['https://mail.google.com/']
+	scopes = ['https://www.googleapis.com/auth/gmail.modify']
 
 	creds = None
 	# The file token.pickle stores the user's access and refresh tokens, and is
@@ -84,7 +85,6 @@ def get_mail_texts(service, mail_id):
 		return [mail_subject, mail_snippet]
 	except (KeyError, errors.HttpError) as e:
 		print(e)
-		return []
 
 def inference(mail_texts):
 	'''Returns the polarity of a mail based on its texts.
@@ -154,11 +154,16 @@ def process_message(service, message):
 		service: A Gmail service object to access the Gmail API.
 		message: A message received by a Gmail subscriber.
 	'''
+	# buffer to let Gmail API provide up-to-date results
+	time.sleep(1)
 	mail_id = get_mail_id(service, message)
 	if mail_id is None:
 		return
 
 	mail_texts = get_mail_texts(service, mail_id)
+	if mail_texts is None:
+		return
+
 	polarity = inference(mail_texts)
 	assign_label(service, mail_id, polarity)
 
