@@ -8,7 +8,6 @@ from apiclient import errors
 import os.path
 import pickle
 import ast
-import numpy as np
 import operator
 
 from src.inference import initialize_model, predict
