@@ -1,0 +1,9 @@
+google_auth_oauthlib>=0.4.0
+fastai==1.0.55
+pandas>=0.24.2
+google_api_python_client>=1.7.9
+protobuf>=3.9.0
+scikit_learn>=0.21.2
+google-cloud-pubsub>=0.42.1
+httplib2>=0.13.0
+dvc>=0.51.2
