@@ -178,4 +178,4 @@ def start(model_dir, model_name):
 	'''
 	initialize_model(model_dir, model_name)
 	global POLARITY_EMOJIS
-	POLARITY_EMOJIS = { 'positive': r'🥳', 'neutral': r'🤓', 'negative': r'🧐' }
+	POLARITY_EMOJIS = { 'positive': r'🤓', 'neutral': r'😶', 'negative': r'🧐' }
