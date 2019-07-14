@@ -1,0 +1,12 @@
+md5: cc4fb655305d88a40e21de0125815f10
+cmd: python3 src/transformdata.py -dp data/emobank.csv -op data/transformed_emobank.csv
+wdir: .
+deps:
+- md5: ea2434c7d8a24f4668f10a80b647df9e
+  path: data/emobank.csv
+outs:
+- md5: 62e5c0474915f8f40a51289f8ddfd856
+  path: data/transformed_emobank.csv
+  cache: true
+  metric: false
+  persist: false
