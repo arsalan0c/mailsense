@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# This script evaluates a model on a test set
+# This script evaluates a model on a test set.
 
 import argparse
 from fastai import *
@@ -27,6 +27,7 @@ for i in range(0, len(test_df)):
 	to_predict = str(test_df.iloc[i][DATASET_TEXT_LABEL])
 	target = str(test_df.iloc[i][DATASET_TARGET_LABEL])
 
+	# get the polarity prediction
 	result = str(learn.predict(to_predict)[0])
 	if result == target:
 		correct = correct + 1
