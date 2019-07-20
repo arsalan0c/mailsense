@@ -10,6 +10,7 @@ import pickle
 import ast
 import operator
 import time
+import logging
 
 from src.inference import initialize_model, predict
 
@@ -50,7 +51,7 @@ def get_service(credentials_path, token_path):
 	return service
 
 
-def get_mail_id(service, message):
+def get_mail_id(service, history_id):
 	'''Returns the id of a new Gmail mail based on a message received by a Gmail subscriber.
 
 	Retrieves the history of messages added to the Gmail inbox.
@@ -58,25 +59,26 @@ def get_mail_id(service, message):
 
 	Args:
 		service: A Gmail service object to access the Gmail API.
-		message: A message received by a Gmail subscriber.
+		history_id: History id of a message received by a Gmail subscriber parsed into a dictionary.
 	'''
 	try:
-		history_id = ast.literal_eval(message.data.decode('utf-8'))['historyId']
 		history_obj = service.users().history().list(userId='me', historyTypes='messageAdded', startHistoryId=history_id).execute()
 		mail_id = history_obj['history'][0]['messages'][0]['id']
 		return mail_id
 	except (KeyError, errors.HttpError) as e:
-		print(e)
+		# can be due to no new messages
+		logging.warning('no mail id found for message with history id: %s', history_id, exc_info=True)
 
-def get_mail_texts(service, mail_id):
+def get_mail_texts(service, mail_id, history_id):
 	'''Returns selected texts of a Gmail mail using its unique identifier.
 
 	Retrieves the subject and a snippet of the mail's body.
-	Returns them in a list, or an empty one if they could not be retrieved.
+	Returns them in a list if they can be retrieved.
 
 	Args:
 		service: A Gmail service object to access the Gmail API.
 		mail_id: Unique identifier of a mail to retrieve texts for.
+		history_id: History id of a message received by a Gmail subscriber parsed into a dictionary.
 	'''
 	try:
 		mail_obj = service.users().messages().get(userId='me', id=mail_id).execute()
@@ -84,7 +86,7 @@ def get_mail_texts(service, mail_id):
 		mail_snippet = mail_obj['snippet']
 		return [mail_subject, mail_snippet]
 	except (KeyError, errors.HttpError) as e:
-		print(e)
+		logging.error('no texts found for mail id %s for message with history id: ', mail_id, history_id, exc_info=True)
 
 def inference(mail_texts):
 	'''Returns the polarity of a mail based on its texts.
@@ -100,7 +102,6 @@ def inference(mail_texts):
 		polarity = predict(text)
 		# increment count of this polarity type
 		polarity_counts[polarity] = 1 + polarity_counts.get(polarity, 0)
-
 
 	return max(polarity_counts.items(), key=operator.itemgetter(1))[0]
 
@@ -136,7 +137,7 @@ def assign_label(service, mail_id, polarity):
 		polarity: Polarity text of the mail, a result of the classification of its text(s).
 	'''
 	label_name = polarity + POLARITY_EMOJIS[polarity]
-	label_id = get_label_id(service, label_name)	
+	label_id = get_label_id(service, label_name)
 	# assign label to mail
 	labels_to_change = {'removeLabelIds': [], 'addLabelIds': [label_id]}
 	service.users().messages().modify(userId='me', id=mail_id, body=labels_to_change).execute()
@@ -154,22 +155,33 @@ def process_message(service, message):
 		service: A Gmail service object to access the Gmail API.
 		message: A message received by a Gmail subscriber.
 	'''
-	# buffer to let Gmail API provide up-to-date results
+	message_dict = ast.literal_eval(message.data.decode('utf-8'))
+	history_id = message_dict['historyId']
+	logging.info('received message with history id: %s', history_id)
+
+	# buffer to allow Gmail API provide up-to-date results
 	time.sleep(1)
-	mail_id = get_mail_id(service, message)
+
+	mail_id = get_mail_id(service, history_id)
 	if mail_id is None:
 		return
+	logging.info('retrieved mail id %s for message with history id: %s', mail_id, history_id)
 
-	mail_texts = get_mail_texts(service, mail_id)
+	mail_texts = get_mail_texts(service, mail_id, history_id)
 	if mail_texts is None:
 		return
+	logging.info('retrieved texts %s for mail from message with history id: %s', mail_texts, history_id)
 
 	polarity = inference(mail_texts)
+	logging.info('retrieved polarity %s for mail from message with history id: %s', polarity, history_id)
+
 	assign_label(service, mail_id, polarity)
+	logging.info('assigned label %s to mail\n', polarity)
 
 def start(model_dir, model_name):
 	'''Performs initialization tasks.
 
+	Initializes logger.
 	Triggers the initialization of the polarity classification model.
 	Defines global variables to be used.
 
@@ -177,6 +189,10 @@ def start(model_dir, model_name):
 		model_dir: Directory path for a Fast.ai language model.
 		model_name: File name for a Fast.ai language model.
 	'''
+
+	logging.basicConfig(filename='mailsense_mail.log', level=logging.INFO, format='%(levelname)s-%(message)s')
+	logging.info('initializing')
 	initialize_model(model_dir, model_name)
 	global POLARITY_EMOJIS
 	POLARITY_EMOJIS = { 'positive': r'🤓', 'neutral': r'😶', 'negative': r'🧐' }
+	logging.info('initialization complete')

@@ -20,7 +20,6 @@ def callback(message):
 	Args:
 		message: A Gmail subscription message
 	'''
-	print('Received message: {}'.format(message))
 	# respond with acknowledgement, otherwise the message will keep being received
 	message.ack()
 
