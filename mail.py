@@ -95,7 +95,7 @@ def inference(mail_texts):
 	Returns the polarity with the highest count as the mail's polarity.
 
 	Args:
-		mail_texts: Texts of a mail to perform inference on. For example, subject and body.
+		mail_texts: A List of texts of a mail to perform inference on. For example, subject and body.
 	'''
 	polarity_counts = {}
 	for text in mail_texts:
