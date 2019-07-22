@@ -13,6 +13,7 @@ import time
 import logging
 
 from src.inference import initialize_model, predict
+from metrics import metrics
 
 def get_service(credentials_path, token_path):
 	''' Constructs a Gmail service object to use the Gmail API.
@@ -49,7 +50,6 @@ def get_service(credentials_path, token_path):
 
 	service = build('gmail', 'v1', credentials=creds)
 	return service
-
 
 def get_mail_id(service, history_id):
 	'''Returns the id of a new Gmail mail based on a message received by a Gmail subscriber.
@@ -177,6 +177,7 @@ def process_message(service, message):
 
 	assign_label(service, mail_id, polarity)
 	logging.info('assigned label %s to mail\n', polarity)
+	mail_stats.addPolarity(polarity)
 
 def start(model_dir, model_name):
 	'''Performs initialization tasks.
@@ -192,6 +193,8 @@ def start(model_dir, model_name):
 
 	logging.basicConfig(filename='mailsense_mail.log', level=logging.INFO, format='%(levelname)s-%(message)s')
 	logging.info('initializing')
+	global mail_stats
+	mail_stats = metrics()
 	initialize_model(model_dir, model_name)
 	global POLARITY_EMOJIS
 	POLARITY_EMOJIS = { 'positive': r'🤓', 'neutral': r'😶', 'negative': r'🧐' }
