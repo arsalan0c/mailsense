@@ -67,7 +67,7 @@ def get_mail_id(service, history_id):
 		return mail_id
 	except (KeyError, errors.HttpError) as e:
 		# can be due to no new messages
-		logging.warning('no mail id found for message with history id: %s', history_id, exc_info=True)
+		logger.warning('no mail id found for message with history id: %s', history_id, exc_info=True)
 
 def get_mail_texts(service, mail_id, history_id):
 	'''Returns selected texts of a Gmail mail using its unique identifier.
@@ -86,7 +86,7 @@ def get_mail_texts(service, mail_id, history_id):
 		mail_snippet = mail_obj['snippet']
 		return [mail_subject, mail_snippet]
 	except (KeyError, errors.HttpError) as e:
-		logging.error('no texts found for mail id %s for message with history id: ', mail_id, history_id, exc_info=True)
+		logger.error('no texts found for mail id %s for message with history id: ', mail_id, history_id, exc_info=True)
 
 def inference(mail_texts):
 	'''Returns the polarity of a mail based on its texts.
@@ -157,7 +157,7 @@ def process_message(service, message):
 	'''
 	message_dict = ast.literal_eval(message.data.decode('utf-8'))
 	history_id = message_dict['historyId']
-	logging.info('received message with history id: %s', history_id)
+	logger.info('received message with history id: %s', history_id)
 
 	# buffer to allow Gmail API provide up-to-date results
 	time.sleep(1)
@@ -165,18 +165,18 @@ def process_message(service, message):
 	mail_id = get_mail_id(service, history_id)
 	if mail_id is None:
 		return
-	logging.info('retrieved mail id %s for message with history id: %s', mail_id, history_id)
+	logger.info('retrieved mail id %s for message with history id: %s', mail_id, history_id)
 
 	mail_texts = get_mail_texts(service, mail_id, history_id)
 	if mail_texts is None:
 		return
-	logging.info('retrieved texts %s for mail from message with history id: %s', mail_texts, history_id)
+	logger.info('retrieved texts %s for mail from message with history id: %s', mail_texts, history_id)
 
 	polarity = inference(mail_texts)
-	logging.info('retrieved polarity %s for mail from message with history id: %s', polarity, history_id)
+	logger.info('retrieved polarity %s for mail from message with history id: %s', polarity, history_id)
 
 	assign_label(service, mail_id, polarity)
-	logging.info('assigned label %s to mail\n', polarity)
+	logger.info('assigned label %s to mail\n', polarity)
 	mail_stats.addPolarity(polarity)
 
 def start(model_dir, model_name):
@@ -192,10 +192,12 @@ def start(model_dir, model_name):
 	'''
 
 	logging.basicConfig(filename='mailsense_mail.log', level=logging.INFO, format='%(levelname)s-%(message)s')
-	logging.info('initializing')
+	global logger
+	logger = logging.getLogger('mail')
+	logger.info('initializing')
 	global mail_stats
 	mail_stats = metrics()
 	initialize_model(model_dir, model_name)
 	global POLARITY_EMOJIS
 	POLARITY_EMOJIS = { 'positive': r'🤓', 'neutral': r'😶', 'negative': r'🧐' }
-	logging.info('initialization complete')
+	logger.info('initialization complete')
