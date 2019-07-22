@@ -11,7 +11,7 @@ import argparse
 import mail
 
 def callback(message):
-	'''Receives a Gmail subscription message and process it.
+	'''Receives a Gmail subscription message and processes it.
 
 	Acknowledges the message.
 	Creates a service object to access the Gmail API, to process the message.
