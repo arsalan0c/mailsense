@@ -1,0 +1,12 @@
+md5: d3ffa10a159b2ceb5c790f8db2f6d041
+cmd: python3 ../src/split.py -dp ../data/transformed_emobank.csv -op ../data/split_emobank.csv
+wdir: .
+deps:
+- md5: 52b170be92faeb1dba64d3f087a5c7a2
+  path: ../data/transformed_emobank.csv
+outs:
+- md5: 16a03ca943d40b266007c044c62fcc96
+  path: ../data/split_emobank.csv
+  cache: true
+  metric: false
+  persist: false

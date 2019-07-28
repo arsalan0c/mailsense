@@ -1,0 +1,8 @@
+md5: a3d32c6d63bb633eb013eddea56cd0a5
+wdir: ../..
+outs:
+- md5: ea2434c7d8a24f4668f10a80b647df9e
+  path: data/fastai/emobank.csv
+  cache: true
+  metric: false
+  persist: false
