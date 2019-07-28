@@ -5,6 +5,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from apiclient import errors
 
+from datetime import datetime, timezone
 import os.path
 import pickle
 import ast
@@ -195,7 +196,7 @@ def start(model_dir, model_name):
 	log_dir = os.path.join(os.path.dirname(__file__), '../logs/')
 	if not os.path.exists(log_dir):
 		os.makedirs(log_dir)
-	logging.basicConfig(filename=log_dir + 'mail.log', level=logging.INFO, format='%(levelname)s-%(message)s')
+	logging.basicConfig(filename=log_dir + 'mail.log', level=logging.INFO, format=str(datetime.now(timezone.utc).astimezone()) + ' %(levelname)s-%(message)s')
 	global logger
 	logger = logging.getLogger('mail')
 	logger.info('initializing')
