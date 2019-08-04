@@ -12,6 +12,7 @@ import os
 import sys
 
 import mail
+from watch import watch
 from sentimentanalysis import ModelType
 from sentimentanalysis import MODEL_ARGUMENT_CHOICES
 
@@ -36,6 +37,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='process arguments required for subscriber and mail functionality')
 	parser.add_argument('-p', '--project', help='string: name of the project from Google Cloud', type=str, action='store', required=True)
 	parser.add_argument('-s', '--subscription', help='string: name of the subscription from Google Cloud', type=str, action='store', required=True)
+	parser.add_argument('-t', '--topic', help='string: name of the topic from Google Cloud', type=str, action='store', required=True)
 	parser.add_argument('-mt', '--modeltype', help='string: the type of model to initialize', type=lambda model: ModelType[model], choices=list(ModelType), action='store', required=True)
 	parser.add_argument('-ma', '--modelargs', help='dict: the arguments to initialize the respective model. Arguments required for the various model types: ' + str(MODEL_ARGUMENT_CHOICES), type=ast.literal_eval, action='store', required=False)
 	parser.add_argument('-cp', '--credentialspath', help='string: path to Gmail API credentials file', type=str, action='store', required=True)
@@ -46,6 +48,9 @@ if __name__ == '__main__':
 	# The `subscription_path` method creates a fully qualified identifier
 	# in the form `projects/{project_id}/subscriptions/{subscription_name}`
 	subscription_path = subscriber.subscription_path(args.project, args.subscription)
+
+	service = mail.get_service(args.credentialspath, args.tokenpath)
+	watch(service, args.project, args.topic)
 
 	log_dir = os.path.join(os.path.dirname(__file__), '../logs')
 	if not os.path.exists(log_dir):
