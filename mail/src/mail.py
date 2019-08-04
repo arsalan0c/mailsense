@@ -71,41 +71,26 @@ def get_mail_id(service, history_id):
 		logger.warning('no mail id found for message with history id: %s', history_id, exc_info=True)
 
 def get_mail_texts(service, mail_id, history_id):
-	'''Returns selected texts of a Gmail mail using its unique identifier.
+	'''Returns a list of tuples of selected texts of a Gmail mail and their weights for sentiment classification.
 
-	Retrieves the subject and a snippet of the mail's body.
-	Returns them in a list if they can be retrieved.
+	Retrieves the subject and a snippet of the mail's body using the mail's unique identifier.
+	Returns the texts and their respectives weights as a list of tuples.
 
 	Args:
 		service: A Gmail service object to access the Gmail API.
 		mail_id: Unique identifier of a mail to retrieve texts for.
 		history_id: History id of a message received by a Gmail subscriber parsed into a dictionary.
 	'''
+	# set weights for mail texts
+	MAIL_SUBJECT_WEIGHT = 0.3
+	MAIL_SNIPPET_WEIGHT = 0.7 # greater weight for body snippet since it is likely to contain more info.
 	try:
 		mail_obj = service.users().messages().get(userId='me', id=mail_id).execute()
 		mail_subject = mail_obj['payload']['headers'][3]['value']
 		mail_snippet = mail_obj['snippet']
-		return [mail_subject, mail_snippet]
+		return [(mail_subject, MAIL_SUBJECT_WEIGHT), (mail_snippet, MAIL_SNIPPET_WEIGHT)]
 	except (KeyError, errors.HttpError) as e:
 		logger.error('no texts found for mail id %s for message with history id: ', mail_id, history_id, exc_info=True)
-
-def inference(mail_texts):
-	'''Returns the polarity label of a mail based on its texts.
-
-	Performs inference on each of the mail's texts.
-	Returns the polarity label with the highest count as the mail's polarity label.
-
-	Args:
-		mail_texts: A List of texts of a mail to perform inference on. For example, subject and body.
-	'''
-	polarity_counts = {}
-	for text in mail_texts:
-		if len(text) > 0:
-			polarity_label = model.predict(text)
-			# increment count of this polarity type
-			polarity_counts[polarity_label] = 1 + polarity_counts.get(polarity_label, 0)
-
-	return max(polarity_counts.items(), key=operator.itemgetter(1))[0]
 
 def get_label_id(service, label_name):
 	'''Returns the unique identifier for a Gmail label based on its name.
@@ -173,7 +158,7 @@ def process_message(service, message):
 		return
 	logger.info('retrieved texts %s for mail from message with history id: %s', mail_texts, history_id)
 
-	polarity_label = inference(mail_texts)
+	polarity_label = model.analyze(mail_texts)
 	logger.info('retrieved polarity label %s for mail from message with history id: %s', polarity_label, history_id)
 
 	assign_label(service, mail_id, polarity_label)

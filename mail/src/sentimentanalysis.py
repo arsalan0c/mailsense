@@ -70,10 +70,34 @@ class Model(object):
 		textblob_inference.initialize_model()
 		return textblob_inference
 
-	def predict(self, text):
-		'''Returns the polarity label of the text after classifying it.
+	def analyze(self, texts_weights):
+		'''Returns the polarity label after classifying texts.
+
+		Predicts the polarity of each text.
+		Determines the overall polarity through weighting.
 
 		Args:
-			text: The text to perform sentiment analysis on.
+			texts_weights: A List of tuples: [(text, weight of text), ...]
 		'''
-		return self.POLARITY_LABELS[self.model.predict(text)]
+		score = 0.0
+		for text, weight in texts_weights:
+			if len(text) < 1:
+				continue
+
+			text_polarity = self.model.predict(text)
+			if text_polarity == 'positive':
+				score = 1.0 * weight + score
+			elif text_polarity == 'neutral':
+				score = 0.0 * weight + score
+			elif text_polarity == 'negative':
+				score = -1.0 * weight + score
+
+		total_polarity = None
+		if score >= 0.5:
+			total_polarity = 'positive'
+		elif score > -0.5 and score < 0.5:
+			total_polarity = 'neutral'
+		elif score <= -0.5:
+			total_polarity = 'negative'
+
+		return self.POLARITY_LABELS[total_polarity]
