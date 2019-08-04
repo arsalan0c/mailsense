@@ -12,10 +12,8 @@ import ast
 import operator
 import time
 import logging
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../fastai/src/'))
 
-from inference import initialize_model, predict
+from sentimentanalysis import Model
 from metrics import metrics
 
 def get_service(credentials_path, token_path):
@@ -73,40 +71,26 @@ def get_mail_id(service, history_id):
 		logger.warning('no mail id found for message with history id: %s', history_id, exc_info=True)
 
 def get_mail_texts(service, mail_id, history_id):
-	'''Returns selected texts of a Gmail mail using its unique identifier.
+	'''Returns a list of tuples of selected texts of a Gmail mail and their weights for sentiment classification.
 
-	Retrieves the subject and a snippet of the mail's body.
-	Returns them in a list if they can be retrieved.
+	Retrieves the subject and a snippet of the mail's body using the mail's unique identifier.
+	Returns the texts and their respectives weights as a list of tuples.
 
 	Args:
 		service: A Gmail service object to access the Gmail API.
 		mail_id: Unique identifier of a mail to retrieve texts for.
 		history_id: History id of a message received by a Gmail subscriber parsed into a dictionary.
 	'''
+	# set weights for mail texts
+	MAIL_SUBJECT_WEIGHT = 0.3
+	MAIL_SNIPPET_WEIGHT = 0.7 # greater weight for body snippet since it is likely to contain more info.
 	try:
 		mail_obj = service.users().messages().get(userId='me', id=mail_id).execute()
 		mail_subject = mail_obj['payload']['headers'][3]['value']
 		mail_snippet = mail_obj['snippet']
-		return [mail_subject, mail_snippet]
+		return [(mail_subject, MAIL_SUBJECT_WEIGHT), (mail_snippet, MAIL_SNIPPET_WEIGHT)]
 	except (KeyError, errors.HttpError) as e:
 		logger.error('no texts found for mail id %s for message with history id: ', mail_id, history_id, exc_info=True)
-
-def inference(mail_texts):
-	'''Returns the polarity of a mail based on its texts.
-
-	Performs inference on each of the mail's texts.
-	Returns the polarity with the highest count as the mail's polarity.
-
-	Args:
-		mail_texts: A List of texts of a mail to perform inference on. For example, subject and body.
-	'''
-	polarity_counts = {}
-	for text in mail_texts:
-		polarity = predict(text)
-		# increment count of this polarity type
-		polarity_counts[polarity] = 1 + polarity_counts.get(polarity, 0)
-
-	return max(polarity_counts.items(), key=operator.itemgetter(1))[0]
 
 def get_label_id(service, label_name):
 	'''Returns the unique identifier for a Gmail label based on its name.
@@ -128,7 +112,7 @@ def get_label_id(service, label_name):
 	created_label = service.users().labels().create(userId='me', body={'name': label_name, 'labelListVisibility': 'labelShow', 'messageListVisibility': 'show'}).execute()
 	return created_label['id']
 
-def assign_label(service, mail_id, polarity):
+def assign_label(service, mail_id, polarity_label):
 	'''Assigns a label to a Gmail mail.
 
 	Determines the label to be assigned, as a combination of the polarity text and its corresponding emoji.
@@ -137,10 +121,9 @@ def assign_label(service, mail_id, polarity):
 	Args:
 		service: A Gmail service object to access the Gmail API.
 		mail_id: Unique identifier for a Gmail mail to be assigned a label to.
-		polarity: Polarity text of the mail, a result of the classification of its text(s).
+		polarity_label: Polarity label of the mail, a result of the classification of its text(s).
 	'''
-	label_name = polarity + POLARITY_EMOJIS[polarity]
-	label_id = get_label_id(service, label_name)
+	label_id = get_label_id(service, polarity_label)
 	# assign label to mail
 	labels_to_change = {'removeLabelIds': [], 'addLabelIds': [label_id]}
 	service.users().messages().modify(userId='me', id=mail_id, body=labels_to_change).execute()
@@ -151,7 +134,7 @@ def process_message(service, message):
 	Calls functions to achieve the following (in order):
 		Retrieve the id of a new mail in an inbox, if any.
 		Retrieve relevant texts of the new mail using the id.
-		Perform inference on the texts.
+		Retrieve inference on the texts.
 		Assign a label to the new mail.
 
 	Args:
@@ -175,14 +158,17 @@ def process_message(service, message):
 		return
 	logger.info('retrieved texts %s for mail from message with history id: %s', mail_texts, history_id)
 
-	polarity = inference(mail_texts)
-	logger.info('retrieved polarity %s for mail from message with history id: %s', polarity, history_id)
+	polarity_label = model.analyze(mail_texts)
+	logger.info('retrieved polarity label %s for mail from message with history id: %s', polarity_label, history_id)
 
-	assign_label(service, mail_id, polarity)
-	logger.info('assigned label %s to mail\n', polarity)
-	mail_stats.addPolarity(polarity)
+	assign_label(service, mail_id, polarity_label)
+	logger.info('assigned label %s to mail from message with history_id: %s\n', polarity_label, history_id)
+	try:
+		mail_stats.addPolarity(polarity_label)
+	except Error as e:
+		logger.error('failed to record email polarity classification', exc_info=True)
 
-def start(model_dir, model_name):
+def start(model_type, model_args, log_path):
 	'''Performs initialization tasks.
 
 	Initializes logger.
@@ -190,21 +176,27 @@ def start(model_dir, model_name):
 	Defines global variables to be used.
 
 	Args:
-		model_dir: Directory path for a Fast.ai language model.
-		model_name: File name for a Fast.ai language model.
+		model_type: A ModelType (sentimentanalysis.py) value of the sentiment analysis model to use.
+		model_args: The argument for the respective sentiment analysis model.
+		log_path: The path of the log file for this file.
 	'''
-	log_dir = os.path.join(os.path.dirname(__file__), '../logs/')
-	if not os.path.exists(log_dir):
-		os.makedirs(log_dir)
-	logging.basicConfig(filename=log_dir + 'mail.log', level=logging.INFO, format=str(datetime.now(timezone.utc).astimezone()) + ' %(levelname)s-%(message)s')
+	logging.basicConfig(filename=log_path, level=logging.INFO, format=str(datetime.now(timezone.utc).astimezone()) + ' %(name)s' + ' %(levelname)s-%(message)s')
 	global logger
-	logger = logging.getLogger('mail')
+	logger = logging.getLogger('mailsense.mail.mail')
 	logger.info('initializing')
 
 	global mail_stats
-	mail_stats = metrics()
-	initialize_model(model_dir, model_name)
-	global POLARITY_EMOJIS
-	POLARITY_EMOJIS = { 'positive': r'🤓', 'neutral': r'😶', 'negative': r'🧐' }
+	try:
+		mail_stats = metrics()
+	except Error as e:
+		logger.error('failed to initialize mail statistics', exc_info=True)
+		raise
+
+	global model
+	try:
+		model = Model(model_type, model_args)
+	except Error as e:
+		logger.error('failed to initialize sentiment analysis model', exc_info=True)
+		raise
 
 	logger.info('initialization complete')

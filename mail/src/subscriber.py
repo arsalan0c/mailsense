@@ -7,8 +7,13 @@ from google.cloud import pubsub_v1
 
 import time
 import argparse
+import ast
+import os
+import sys
 
 import mail
+from sentimentanalysis import ModelType
+from sentimentanalysis import MODEL_ARGUMENT_CHOICES
 
 def callback(message):
 	'''Receives a Gmail subscription message and processes it.
@@ -31,8 +36,8 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='process arguments required for subscriber and mail functionality')
 	parser.add_argument('-p', '--project', help='string: name of the project from Google Cloud', type=str, action='store', required=True)
 	parser.add_argument('-s', '--subscription', help='string: name of the subscription from Google Cloud', type=str, action='store', required=True)
-	parser.add_argument('-md', '--modeldirectory', help='string: path to directory containing model file', type=str, action='store', required=True)
-	parser.add_argument('-mn', '--modelname', help='string: name of model file', type=str, action='store', required=True)
+	parser.add_argument('-mt', '--modeltype', help='string: the type of model to initialize', type=lambda model: ModelType[model], choices=list(ModelType), action='store', required=True)
+	parser.add_argument('-ma', '--modelargs', help='dict: the arguments to initialize the respective model. Arguments required for the various model types: ' + str(MODEL_ARGUMENT_CHOICES), type=ast.literal_eval, action='store', required=False)
 	parser.add_argument('-cp', '--credentialspath', help='string: path to Gmail API credentials file', type=str, action='store', required=True)
 	parser.add_argument('-tp', '--tokenpath', help='string: path to Gmail API token file', type=str, action='store', required=True)
 	args = parser.parse_args()
@@ -42,8 +47,18 @@ if __name__ == '__main__':
 	# in the form `projects/{project_id}/subscriptions/{subscription_name}`
 	subscription_path = subscriber.subscription_path(args.project, args.subscription)
 
-	# perform mail initialization tasks
-	mail.start(args.modeldirectory, args.modelname)
+	log_dir = os.path.join(os.path.dirname(__file__), '../logs')
+	if not os.path.exists(log_dir):
+		os.makedirs(log_dir)
+
+	MAIL_LOG_NAME = 'mail.log'
+	log_path = log_dir + '/' + MAIL_LOG_NAME
+	try:
+		# perform mail initialization tasks
+		mail.start(args.modeltype, args.modelargs, log_path)
+	except Error as e:
+		print('The following error occurred when initializing mail:\n' + e + '\nPlease check ' + log_path + ' for more information')
+		sys.exit(1)
 
 	subscriber.subscribe(subscription_path, callback=callback)
 	# The subscriber is non-blocking. We must keep the main thread from
