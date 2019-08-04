@@ -31,6 +31,7 @@ def train(data_lm, data_clas, epochs=1, drop_mult=1, lr=1e-2):
 def show_results(learn):
 	preds, y, losses = learn.get_preds(DatasetType.Train, with_loss=True)
 	interp = ClassificationInterpretation(learn, preds, y, losses)
+	print("\nY Axis: actual, X Axis: predicted")
 	print(interp.confusion_matrix(slice_size=10))
 
 if __name__ == '__main__':
