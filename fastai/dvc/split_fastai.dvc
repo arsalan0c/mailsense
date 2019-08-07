@@ -1,0 +1,14 @@
+md5: a731714d05854415d7453eff4b459197
+cmd: python3 ../src/split.py -dp ../../data/result/transformed_dataset.csv -op ../../data/result/split_dataset.csv
+wdir: .
+deps:
+- md5: 3732d36e13792780a9b424eaeb2250b9
+  path: ../../data/result/transformed_dataset.csv
+- md5: 351936373782523166485933a2784da3
+  path: ../src/split.py
+outs:
+- md5: 5ee1d827bc554991aa8137ed92b34deb
+  path: ../../data/result/split_dataset.csv
+  cache: true
+  metric: false
+  persist: false

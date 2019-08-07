@@ -1,0 +1,15 @@
+md5: f3d14d6c0916c8aa4232b0f2e59d9593
+cmd: python3 ../src/train.py -dp ../../data/result/split_dataset.csv -lme 5 -tce 5
+  -lmlr 1e-2 -tclr 1e-2 -od ../models
+wdir: .
+deps:
+- md5: 696514cd62a226c458bfb287ab689ba6
+  path: ../src/train.py
+- md5: 5ee1d827bc554991aa8137ed92b34deb
+  path: ../../data/result/split_dataset.csv
+outs:
+- md5: d3d62d86d09ecb3ceeb8846756f1d33c
+  path: ../models/textclassifier.pkl
+  cache: true
+  metric: false
+  persist: false

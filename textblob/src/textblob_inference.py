@@ -7,9 +7,10 @@ import nltk
 def initialize_model():
 	'''Initializes a textblob naive bayes sentiment analysis model.
 	'''
-	# prevent exposing the learner
 	nltk.download('movie_reviews')
 	nltk.download('punkt')
+
+	# prevent exposing the learner
 	global analyzer
 	analyzer = NaiveBayesAnalyzer()
 	analyzer.train()

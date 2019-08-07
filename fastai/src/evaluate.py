@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# This script evaluates a model on a test set.
+# This script evaluates a fastai model on a test set.
 
 import argparse
 from fastai import *
@@ -35,5 +35,6 @@ for i in range(0, len(test_df)):
 	total = total + 1
 
 accuracy = (correct / total * 100)
+print('accuracy: ' + str(accuracy))
 with open(args.outputpath, 'w') as f:
 	f.write(str(accuracy))

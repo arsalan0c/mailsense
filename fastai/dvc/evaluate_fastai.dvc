@@ -1,0 +1,17 @@
+md5: 1c43eb68e5609cee85d49a8f2b71638f
+cmd: python3 ../src/evaluate.py -dp ../../data/result/split_dataset.csv -op ../results/acc.metric
+  -md ../models -mn textclassifier.pkl
+wdir: .
+deps:
+- md5: a7f2a02fe28804300553cabf649068a9
+  path: ../src/evaluate.py
+- md5: 5ee1d827bc554991aa8137ed92b34deb
+  path: ../../data/result/split_dataset.csv
+- md5: d3d62d86d09ecb3ceeb8846756f1d33c
+  path: ../models/textclassifier.pkl
+outs:
+- md5: 56f90b065e10e0f78c65759366a89d6f
+  path: ../results/acc.metric
+  cache: false
+  metric: true
+  persist: false

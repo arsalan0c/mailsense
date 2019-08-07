@@ -1,0 +1,20 @@
+md5: d1fa9ecfda9114733162ce5674bef2d8
+cmd: python3 ../src/transformdata.py -dr ../../data/source -op ../../data/result/transformed_dataset.csv
+wdir: .
+deps:
+- md5: 55947599920b1ed14ebfd254484bf5ad
+  path: ../../data/source/yelp.csv
+- md5: df9fb96ec7dcb5ab386f0dfdc1b8f9dc
+  path: ../../data/source/imdb.csv
+- md5: ff1668a2806ec715234e4f776e11f223
+  path: ../../data/source/amazon.csv
+- md5: ea2434c7d8a24f4668f10a80b647df9e
+  path: ../../data/source/emobank.csv
+- md5: 9de4a7bbc629e9530933ec1ecb5f7792
+  path: ../src/transformdata.py
+outs:
+- md5: 3732d36e13792780a9b424eaeb2250b9
+  path: ../../data/result/transformed_dataset.csv
+  cache: true
+  metric: false
+  persist: false

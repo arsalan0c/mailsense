@@ -1,0 +1,27 @@
+md5: 9b8987f82231e48876e607c720e0975c
+cmd: ../../data/src/retrievedata.sh
+wdir: .
+deps:
+- md5: dcf8b0e2db9a438e204ad63876741d04
+  path: ../../data/src/retrievedata.sh
+outs:
+- md5: ea2434c7d8a24f4668f10a80b647df9e
+  path: ../../data/source/emobank.csv
+  cache: true
+  metric: false
+  persist: false
+- md5: ff1668a2806ec715234e4f776e11f223
+  path: ../../data/source/amazon.csv
+  cache: true
+  metric: false
+  persist: false
+- md5: df9fb96ec7dcb5ab386f0dfdc1b8f9dc
+  path: ../../data/source/imdb.csv
+  cache: true
+  metric: false
+  persist: false
+- md5: 55947599920b1ed14ebfd254484bf5ad
+  path: ../../data/source/yelp.csv
+  cache: true
+  metric: false
+  persist: false

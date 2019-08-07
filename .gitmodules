@@ -1,3 +1,3 @@
-[submodule "fastai/data/EmoBank"]
-	path = fastai/data/EmoBank
-	url = https://github.com/JULIELab/EmoBank.git
+[submodule "data/source/EmoBank"]
+	path = data/source/EmoBank
+	url = https://github.com/JULIELab/EmoBank

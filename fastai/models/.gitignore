@@ -1,3 +1,1 @@
-# fastai language model files
-*.pth
-textclassifier.pkl
+/textclassifier.pkl
