@@ -6,14 +6,17 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../fastai/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../textblob/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../nltk/'))
 
 from src import inference as fastai_inference
 from src import textblob_inference
+from src import nltk_inference 
 
 
 MODEL_ARGUMENT_CHOICES = {
 	"fastai": "{'model_dir': Directory of the saved fastai model, 'model_name': File name of the saved fastai model}",
 	"textblob": "no arguments needed"
+	"nltk": "no arguments needed"
 }
 
 class ModelType(Enum):
@@ -21,6 +24,7 @@ class ModelType(Enum):
 	'''
 	fastai = 0
 	textblob = 1
+	nltk = 2
 
 	def __str__(self):
 		return self.name
@@ -51,7 +55,8 @@ class Model(object):
 
 		self.initialize_models = {
 			ModelType.fastai: self.initialize_fastai,
-			ModelType.textblob: self.initialize_textblob
+			ModelType.textblob: self.initialize_textblob,
+			ModelType.nltk: self.initialize_nltk
 		}
 		self.model = self.initialize_models[model_type](model_args)
 
@@ -69,6 +74,12 @@ class Model(object):
 		'''
 		textblob_inference.initialize_model()
 		return textblob_inference
+
+	def initialize_nltk(self, args):
+		'''Initializes the nltk sentiment intensity analysis model.
+		'''
+		nltk_inference.initialize_model()
+		return nltk_inference
 
 	def analyze(self, texts_weights):
 		'''Returns the polarity label after classifying texts.
@@ -91,6 +102,8 @@ class Model(object):
 				score = 0.0 * weight + score
 			elif text_polarity == 'negative':
 				score = -1.0 * weight + score
+			else:
+				raise ValueError('Text Polarity predicted by model must be one of the following: "positive", "negative", "neutral"')
 
 		total_polarity = None
 		if score >= 0.5:
