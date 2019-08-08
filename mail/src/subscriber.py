@@ -61,8 +61,8 @@ if __name__ == '__main__':
 	try:
 		# perform mail initialization tasks
 		mail.start(args.modeltype, args.modelargs, log_path)
-	except Error as e:
-		print('The following error occurred when initializing mail:\n' + e + '\nPlease check ' + log_path + ' for more information')
+	except Exception as e:
+		print('The following error occurred when initializing mail:\n' + str(e) + '\nPlease check ' + log_path + ' for more information')
 		sys.exit(1)
 
 	subscriber.subscribe(subscription_path, callback=callback)

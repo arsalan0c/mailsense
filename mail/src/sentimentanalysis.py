@@ -8,14 +8,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../fastai/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../textblob/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../nltk/'))
 
-from src import inference as fastai_inference
-from src import textblob_inference
-from src import nltk_inference 
-
-
 MODEL_ARGUMENT_CHOICES = {
 	"fastai": "{'model_dir': Directory of the saved fastai model, 'model_name': File name of the saved fastai model}",
-	"textblob": "no arguments needed"
+	"textblob": "no arguments needed",
 	"nltk": "no arguments needed"
 }
 
@@ -66,18 +61,24 @@ class Model(object):
 		Args:
 			args: A dictionary: {'model_dir': Directory of the saved fastai model, 'model_name': File name of the saved fastai model}
 		'''
+		from src import inference as fastai_inference
+
 		fastai_inference.initialize_model(args['model_dir'], args['model_name'])
 		return fastai_inference
 
 	def initialize_textblob(self, args):
 		'''Initializes the textblob classification model.
 		'''
+		from src import textblob_inference
+
 		textblob_inference.initialize_model()
 		return textblob_inference
 
 	def initialize_nltk(self, args):
 		'''Initializes the nltk sentiment intensity analysis model.
 		'''
+		from src import nltk_inference
+
 		nltk_inference.initialize_model()
 		return nltk_inference
 

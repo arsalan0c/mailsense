@@ -52,11 +52,10 @@ def get_service(credentials_path, token_path):
 	service = build('gmail', 'v1', credentials=creds)
 	return service
 
-def get_mail_id(service, history_id):
-	'''Returns the id of a new Gmail mail based on a message received by a Gmail subscriber.
+def get_mail_ids(service, history_id):
+	'''Returns a list of ids of new Gmail mails based on a message received by a Gmail subscriber.
 
 	Retrieves the history of messages added to the Gmail inbox.
-	Returns the id of the first one in the history.
 
 	Args:
 		service: A Gmail service object to access the Gmail API.
@@ -64,13 +63,16 @@ def get_mail_id(service, history_id):
 	'''
 	try:
 		history_obj = service.users().history().list(userId='me', historyTypes='messageAdded', startHistoryId=history_id).execute()
-		mail_id = history_obj['history'][0]['messages'][0]['id']
-		return mail_id
+		mail_ids = []
+		for mail in history_obj['history'][0]['messages']:
+			mail_ids.append(mail['id'])
+
+		return mail_ids
 	except (KeyError, errors.HttpError) as e:
 		# can be due to no new messages
 		logger.warning('no mail id found for message with history id: %s', history_id, exc_info=True)
 
-def get_mail_texts(service, mail_id, history_id):
+def get_weighted_mail_texts(service, mail_id, history_id):
 	'''Returns a list of tuples of selected texts of a Gmail mail and their weights for sentiment classification.
 
 	Retrieves the subject and a snippet of the mail's body using the mail's unique identifier.
@@ -148,25 +150,26 @@ def process_message(service, message):
 	# buffer to allow Gmail API provide up-to-date results
 	time.sleep(1)
 
-	mail_id = get_mail_id(service, history_id)
-	if mail_id is None:
+	mail_ids = get_mail_ids(service, history_id)
+	if mail_ids is None or len(mail_ids) == 0:
 		return
-	logger.info('retrieved mail id %s for message with history id: %s', mail_id, history_id)
+	logger.info('retrieved mail ids %s for message with history id: %s', str(mail_ids), history_id)
 
-	mail_texts = get_mail_texts(service, mail_id, history_id)
-	if mail_texts is None:
-		return
-	logger.info('retrieved texts %s for mail from message with history id: %s', mail_texts, history_id)
+	for mail_id in mail_ids:
+		mail_texts = get_weighted_mail_texts(service, mail_id, history_id)
+		if mail_texts is None:
+			return
+		logger.info('retrieved texts %s for mail from message with history id: %s', mail_texts, history_id)
 
-	polarity_label = model.analyze(mail_texts)
-	logger.info('retrieved polarity label %s for mail from message with history id: %s', polarity_label, history_id)
+		polarity_label = model.analyze(mail_texts)
+		logger.info('retrieved polarity label %s for mail from message with history id: %s', polarity_label, history_id)
 
-	assign_label(service, mail_id, polarity_label)
-	logger.info('assigned label %s to mail from message with history_id: %s\n', polarity_label, history_id)
-	try:
-		mail_stats.addPolarity(polarity_label)
-	except Error as e:
-		logger.error('failed to record email polarity classification', exc_info=True)
+		assign_label(service, mail_id, polarity_label)
+		logger.info('assigned label %s to mail from message with history_id: %s\n', polarity_label, history_id)
+		try:
+			mail_stats.addPolarity(polarity_label)
+		except Error as e:
+			logger.error('failed to record email polarity classification', exc_info=True)
 
 def start(model_type, model_args, log_path):
 	'''Performs initialization tasks.
@@ -189,14 +192,17 @@ def start(model_type, model_args, log_path):
 	try:
 		mail_stats = metrics()
 	except Error as e:
-		logger.error('failed to initialize mail statistics', exc_info=True)
-		raise
+		msg = 'failed to initialize mail statistics'
+		logger.error(msg, exc_info=True)
+		raise RuntimeError(msg)
 
 	global model
 	try:
 		model = Model(model_type, model_args)
 	except Error as e:
-		logger.error('failed to initialize sentiment analysis model', exc_info=True)
-		raise
+		msg = 'failed to initialize sentiment analysis model'
+		logger.error(msg, exc_info=True)
+		raise RuntimeError(msg)
 
 	logger.info('initialization complete')
+	logger.info('model being used: %s', str(model_type))
