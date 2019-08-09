@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import argparse
+
 import nltk
 nltk.download('vader_lexicon')
 from nltk.sentiment.vader import SentimentIntensityAnalyzer as SIA
@@ -31,3 +33,12 @@ def predict(text):
 		return 'neutral'
 	elif polarity == 'neg':
 		return 'negative'
+
+if __name__ == '__main__':
+	parser = argparse.ArgumentParser(description='process arguments required for performing inference with trained model on input text')
+	parser.add_argument('-t', '--text', help='string: text to perform inference on', type=str, action='store', required=True)
+	args = parser.parse_args()
+
+	initialize_model()
+	polarity = predict(args.text)
+	print(polarity)
