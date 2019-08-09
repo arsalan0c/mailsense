@@ -169,7 +169,7 @@ def process_message(service, message):
 		try:
 			mail_stats.addPolarity(polarity_label)
 		except Error as e:
-			logger.error('failed to record email polarity classification', exc_info=True)
+			logger.error('failed to record email polarity classification for message with history id: %s', history_id, exc_info=True)
 
 def start(model_type, model_args, log_path):
 	'''Performs initialization tasks.
