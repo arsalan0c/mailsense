@@ -1,6 +1,6 @@
 # mailsense
 
-> Subscribes to Gmail events to obtain new emails, performs sentiment analysis on them and then labels them.
+> Subscribes to Gmail events to obtain new emails, performs sentiment analysis and then labels them.
 
 ## Start
 1. clone this repo: `git clone --recurse-submodules https://github.com/arsalanc-v2/mailsense.git`
@@ -63,7 +63,7 @@ Eg. `python3 textblob/src/textblob_inference.py -t "The spice must flow"` prints
 
 ### Fastai
 A trained fastai model is provided at `mail/sample/textclassifier.pkl`.
-It was trained on [EmoBank](https://github.com/JULIELab/EmoBank) and [Sentiment Labelled Sentences](https://archive.ics.uci.edu/ml/datasets/Sentiment+Labelled+Sentences).
+It was trained on [EmoBank](https://github.com/JULIELab/EmoBank) and [Sentiment Labelled Sentences](https://archive.ics.uci.edu/ml/datasets/Sentiment+Labelled+Sentences). The one cycle policy was used in training to speed up training with a greater learning rate.
 
 [DVC](https://dvc.org/) was used to benchmark the training experiments with different model hyperparameters.<br/>
 See the pipeline: `dvc pipeline show fastai/dvc/evaluate_fastai.dvc --ascii`<br/>
