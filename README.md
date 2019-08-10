@@ -14,7 +14,7 @@ Note the project name, subscription name and topic name (last section of the ids
 8. `pip install -r requirements.txt`
 9. Begin: `python3 mail/src/subscriber.py -p projectname -s subscriptionname -t topicname -cp /path/to/gmail_credentials.json -tp token.pickle -mt fastai -ma "{'model_dir':'./mail/sample', 'model_name':'textclassifier.pkl'}"`
 
-On first run, you will be prmopted to sign in and give the application access to view and modify your email.
+On first run, you will be prompted to sign in and give the application access to view and modify your email.
   
 ## Scoring
 Sentiment analysis is performed on an email's subject and a snippet of its body. 
@@ -71,7 +71,7 @@ Reproduce the pipeline: `dvc repro fastai/dvc/evaluate_fastai.dvc`
 
 ## Metrics
 Sqlite (`mailsense.db`) is used to keep track of sentiment information:
-* label assigned to each email and its datetime
+* label assigned to each email and its datetime (without email text)
 
 Run `python3 mail/src/metrics.py` to print some statistics to the console.
 
