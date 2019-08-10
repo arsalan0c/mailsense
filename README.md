@@ -1,6 +1,7 @@
 # mailsense
 
 > Subscribes to Gmail events to obtain new emails, performs sentiment analysis and then labels them.
+![](demo.gif)
 
 ## Start
 1. clone this repo: `git clone --recurse-submodules https://github.com/arsalanc-v2/mailsense.git`
